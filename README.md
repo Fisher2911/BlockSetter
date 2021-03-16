@@ -14,7 +14,9 @@ run at the same time
 
 
 
-Example
+Example 
+
+```java
 
 World world = Bukkit.getWorld("World");
 
@@ -31,14 +33,14 @@ blockTask.setFinalCompletable(result -> getLogger().info("Final Completed"));
 //This will happen to every block
 blockTask.setSetChangeable(block -> block.setType(Material.AIR));
 
-It is better to use blockTask.setMaterial(Material.Air) instead,
-because it uses nms to place the blocks
+// It is better to use blockTask.setMaterial(Material.Air) instead,
+// because it uses nms to place the blocks
 
 //This starts the BlockTask
 
 blockTask.setBlocks();
 
-
+```
 
 Works in a grid coordinate grid pattern
 
