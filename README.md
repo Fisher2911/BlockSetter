@@ -10,7 +10,7 @@ You can create multiple BlockTasks,
 They will be queued so they will not
 run at the same time
 
-Example
+Example\n
 World world = Bukkit.getWorld("World");
 BlockTask blockTask = new BlockTask(world, -200, 0, -200, 200, 255, 200, Material.AIR, 100_000, 1);
 //This will happen when a section of a blocktask is completed
