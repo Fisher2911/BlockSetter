@@ -6,9 +6,13 @@ For example, if there was a 100 x 100 * 256 layer you wanted cleared,
 And you specified to clear 100,000 blocks at a time, it would only clear
 10,000 blocks at a time because 100 * 100 = 10,000
 
+
+
 You can create multiple BlockTasks,
 They will be queued so they will not
 run at the same time
+
+
 
 Example
 
@@ -31,6 +35,7 @@ blockTask.setSetChangeable(block -> block.setType(Material.AIR));
 //This starts the BlockTask
 
 blockTask.setBlocks();
+
 
 
 Works in a grid coordinate grid pattern
