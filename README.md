@@ -22,11 +22,11 @@ BlockTask blockTask = new BlockTask(world, -200, 0, -200, 200, 255, 200, Materia
 
 //This will happen when a section of a blocktask is completed
 
-blockTask.setSectionCompletable(result -> getLogger().info("Section Completed1"));
+blockTask.setSectionCompletable(result -> getLogger().info("Section Completed"));
 
 //This will happen every time a whole blocktask is completed
 
-blockTask.setFinalCompletable(result -> getLogger().info("Final Completed1"));
+blockTask.setFinalCompletable(result -> getLogger().info("Final Completed"));
 
 //This will happen to every block
 
