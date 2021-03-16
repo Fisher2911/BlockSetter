@@ -29,8 +29,10 @@ blockTask.setSectionCompletable(result -> getLogger().info("Section Completed"))
 blockTask.setFinalCompletable(result -> getLogger().info("Final Completed"));
 
 //This will happen to every block
-
 blockTask.setSetChangeable(block -> block.setType(Material.AIR));
+
+It is better to use blockTask.setMaterial(Material.Air) instead,
+because it uses nms to place the blocks
 
 //This starts the BlockTask
 
