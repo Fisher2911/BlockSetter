@@ -172,16 +172,15 @@
     int chunkStartZ;
 
 
-    private void setBlocks(int x, int y, int z, int xMax, int zMax, int chunksPer, int taskNum, int totalBlocks) {
+      private void setBlocks(int xMax, int zMax, int chunksPer, int taskNum, int totalBlocks) {
+        y = startY;
         if (xMax > endX) xMax = endX;
         if (zMax > endZ) zMax = endZ;
         int savedZ = z;
         int savedX = x;
 
         int chunkAmount = chunksPer * 16;
-
-        System.out.println(x + " " + y + " " + z);
-        System.out.println(xMax + " " + zMax);
+        
         NMS nms = plugin.getNms();
         for (; y <= endY; y++) {
             for (; x <= xMax; x++) {
@@ -214,14 +213,12 @@
             if (finalCompletable != null) finalCompletable.onComplete(result);
             return;
         }
-        int finalX = x;
-        int finalY = startY;
-        int finalZ = z;
+ 
         int finalXMax = xMax;
         int finalZMax = zMax;
         int finalTotalBlocks = totalBlocks;
         if (sectionCompletable != null) sectionCompletable.onComplete(result);
-        Bukkit.getScheduler().runTaskLater(plugin, () -> setBlocks(finalX, startY, finalZ, finalXMax, finalZMax, chunksPer, taskNum +1, finalTotalBlocks), tickSpeed);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> setBlocks(finalXMax, finalZMax, chunksPer, taskNum +1, finalTotalBlocks), tickSpeed);
     }
 
     public void setBlocks() {
@@ -233,7 +230,7 @@
         int z = startZ >> 4 << 4;
         this.chunkStartX = x;
         this.chunkStartZ = z;
-        setBlocks(x, 0, z, x + 15, z + 15, chunksPer, 0, 0);
+        setBlocks(x + 15, z + 15, chunksPer, 0, 0);
     }
 
     public static class BlockTaskResult {
