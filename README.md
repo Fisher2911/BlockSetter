@@ -20,14 +20,13 @@ Example
 
 World world = Bukkit.getWorld("World");
 
-BlockTask blockTask = new BlockTask(world, -200, 0, -200, 200, 255, 200, Material.AIR, 100_000, 1);
+//This will create a blocktask that goes from -200, 0, -200 to 200, 255, 200, and sets blocks ever 1 tick.
+BlockTask blockTask = new BlockTask(world, -200, 0, -200, 200, 255, 200, Material.AIR, 1);
 
-//This will happen when a section of a blocktask is completed
-
+//This will happen when a chunk is completed
 blockTask.setSectionCompletable(result -> getLogger().info("Section Completed"));
 
 //This will happen every time a whole blocktask is completed
-
 blockTask.setFinalCompletable(result -> getLogger().info("Final Completed"));
 
 //This will happen to every block
@@ -37,23 +36,17 @@ blockTask.setSetChangeable(block -> block.setType(Material.AIR));
 // because it uses nms to place the blocks
 
 //This starts the BlockTask
-
 blockTask.setBlocks();
 
 ```
 
-Works in a grid coordinate grid pattern
-
-Starts in lowest section of grid, and works its way up
-
-If a grid is completed, it moves up a y level
-
+It works in a grid coordinate grid pattern and
+starts in lowest section of grid, and works its way up
 Example: Coordinate grid from -500, -500 to 500, 500
-
-If blocksPerSection is set to 10_000, it will start at
-
--500, -500, and go up to -400, -400 for the first section
-
-Then it goes to -300, -400 for the second section, and so on
-
-It moves up the x axis first, then it goes up the z axis
+It will find the chunk that -500, -500 occupies, and start from there.
+It will cycle the chunk up to the y coordinate specified as the height limit.
+Once that is done, it moves to the next chunk in the x direction, so if
+for example the chunk started on -500, -500 exactly, after cycling
+through to -484, -484, it would go to -468, -484.
+Once it gets to 500, 500 it repeats, except it starts at
+-500, -484
