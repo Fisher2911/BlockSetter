@@ -1,15 +1,4 @@
-package me.herobrinegoat.blocksetter;
-
-import org.apache.commons.lang3.Validate;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-
-public class BlockTask implements Cloneable {
-
-    private final BlockSetter plugin;
+ private final BlockSetter plugin;
     public final World world;
     private final int startX;
     private final int startY;
@@ -18,11 +7,15 @@ public class BlockTask implements Cloneable {
     private final int endY;
     private final int endZ;
     private Material material;
-    private final int blocksPerSection;
+    private int chunksPer;
     private final int tickSpeed;
     private Completable sectionCompletable;
     private Completable finalCompletable;
     private Changeable changeable;
+
+    private int x;
+    private int y;
+    private int z;
 
     /**
      *
@@ -34,11 +27,11 @@ public class BlockTask implements Cloneable {
      * @param endY
      * @param endZ
      * @param material - Material to set blocks
-     * @param blocksPerSection - How many blocks are set every cycle
+     * @param chunksPer - How many blocks are set every cycle
      * @param tickSpeed - How often blocks are set, in ticks
      */
 
-    public BlockTask(World world, int startX, int startY, int startZ, int endX, int endY, int endZ, Material material, int blocksPerSection, int tickSpeed) {
+    public BlockTask(World world, int startX, int startY, int startZ, int endX, int endY, int endZ, Material material, int chunksPer, int tickSpeed) {
         this.plugin = BlockSetter.getPlugin(BlockSetter.class);
         this.world = world;
         this.startX = startX;
@@ -48,35 +41,35 @@ public class BlockTask implements Cloneable {
         this.endY = Math.min(endY, 255);
         this.endZ = endZ;
         this.tickSpeed = tickSpeed;
-        this.blocksPerSection = (int) Math.sqrt(blocksPerSection);
-        this.material = null;
+        this.chunksPer = chunksPer;
+        this.material = material;
     }
 
-    public BlockTask(World world, int startX, int startY, int startZ, int endX, int endY, int endZ, int blocksPerSection, int tickSpeed) {
-        this(world, startX, startY, startZ, endX, endY, endZ, null, blocksPerSection, tickSpeed);
+    public BlockTask(World world, int startX, int startY, int startZ, int endX, int endY, int endZ, int chunksPer, int tickSpeed) {
+        this(world, startX, startY, startZ, endX, endY, endZ, null, chunksPer, tickSpeed);
     }
 
-    public BlockTask(World world, int startX, int startY, int startZ, int endX, int endY, int endZ, Material material, int blocksPerSection, int tickSpeed, Completable sectionCompletable, Completable finalCompletable) {
-        this(world, startX, startY, startZ, endX, endY, endZ, material, blocksPerSection, tickSpeed);
+    public BlockTask(World world, int startX, int startY, int startZ, int endX, int endY, int endZ, Material material, int chunksPer, int tickSpeed, Completable sectionCompletable, Completable finalCompletable) {
+        this(world, startX, startY, startZ, endX, endY, endZ, material, chunksPer, tickSpeed);
         this.sectionCompletable = sectionCompletable;
         this.finalCompletable = finalCompletable;
     }
 
-    public BlockTask(Location start, Location end, int blocksPerSection, int tickSpeed, Completable sectionCompletable, Completable finalCompletable) {
-        this(start, end, null, blocksPerSection, tickSpeed, sectionCompletable, finalCompletable);
+    public BlockTask(Location start, Location end, int chunksPer, int tickSpeed, Completable sectionCompletable, Completable finalCompletable) {
+        this(start, end, null, chunksPer, tickSpeed, sectionCompletable, finalCompletable);
     }
 
-    public BlockTask(Location start, Location end, Material material, int blocksPerSection, int tickSpeed, Completable sectionCompletable, Completable finalCompletable) {
-        this(start, end, material, blocksPerSection, tickSpeed);
+    public BlockTask(Location start, Location end, Material material, int chunksPer, int tickSpeed, Completable sectionCompletable, Completable finalCompletable) {
+        this(start, end, material, chunksPer, tickSpeed);
         this.sectionCompletable = sectionCompletable;
         this.finalCompletable = finalCompletable;
     }
 
-    public BlockTask(Location start, Location end, int blocksPerSection, int tickSpeed) {
-        this(start, end, null, blocksPerSection, tickSpeed);
+    public BlockTask(Location start, Location end, int chunksPer, int tickSpeed) {
+        this(start, end, null, chunksPer, tickSpeed);
     }
 
-    public BlockTask(Location start, Location end, Material material, int blocksPerSection, int tickSpeed) {
+    public BlockTask(Location start, Location end, Material material, int chunksPer, int tickSpeed) {
         Validate.isTrue(start.getWorld() != null && start.getWorld().equals(end.getWorld()), "The two world locations must be non-null and the same!");
         this.plugin = BlockSetter.getPlugin(BlockSetter.class);
         this.world = start.getWorld();
@@ -87,7 +80,7 @@ public class BlockTask implements Cloneable {
         this.endY = Math.min(end.getBlockY(), 255);
         this.endZ = end.getBlockZ();
         this.material = material;
-        this.blocksPerSection = blocksPerSection;
+        this.chunksPer = chunksPer;
         this.tickSpeed = tickSpeed;
     }
 
@@ -107,74 +100,140 @@ public class BlockTask implements Cloneable {
         this.changeable = changeable;
     }
 
-    private boolean isRunning;
-
-    public void setBlocks() {
-        if (isRunning) return;
-        plugin.addBlockTask(this);
-        if (!plugin.isFirstInQueue(this)) return;
-        isRunning = true;
-        setBlocks(startX, startY, startZ, startX + blocksPerSection, startZ + blocksPerSection, 0, 0);
+    public int getStartX() {
+        return startX;
     }
 
-    //Example
-    //World world = Bukkit.getWorld("World");
-    //BlockTask blockTask = new BlockTask(world, -200, 0, -200, 200, 255, 200, Material.AIR, 100_000, 1);
-    //blockTask.setSectionCompletable((result) -> getLogger().info("Section Completed1"));
-    //blockTask.setFinalCompletable((result) -> getLogger().info("Final Completed1"));
-    //blockTask.setBlocks();
+    public int getStartY() {
+        return startY;
+    }
+
+    public int getStartZ() {
+        return startZ;
+    }
+
+    public int getEndX() {
+        return endX;
+    }
+
+    public int getEndY() {
+        return endY;
+    }
+
+    public int getEndZ() {
+        return endZ;
+    }
+
+    public Material getMaterial() {
+        return material;
+    }
+
+    public int getChunksPer() {
+        return chunksPer;
+    }
+
+    public int getTickSpeed() {
+        return tickSpeed;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public int getZ() {
+        return z;
+    }
+
+    public int getChunkStartX() {
+        return chunkStartX;
+    }
+
+    public int getChunkStartZ() {
+        return chunkStartZ;
+    }
+
+    private Runnable pluginDisableRunnable;
+
+    public void setPluginDisableRunnable(Runnable pluginDisableRunnable) {
+        this.pluginDisableRunnable = pluginDisableRunnable;
+    }
+
+    public void onPluginDisable() {
+        if (pluginDisableRunnable != null) pluginDisableRunnable.run();
+    }
+
+    private boolean isRunning;
+
+    int chunkStartX;
+    int chunkStartZ;
 
 
-    //Works in a grid coordinate grid pattern
-    //Starts in lowest section of grid, and works its way up
-    //If a grid is completed, it moves up a y level
-    //Example: Coordinate grid from -500, -500 to 500, 500
-    //If blocksPerSection is set to 10_000, it will start at
-    //-500, -500, and go up to -400, -400 for the first section
-    //Then it goes to -300, -400 for the second section, and so on
-    //It moves up the x axis first, then it goes up the z axis
-    private void setBlocks(int x, int y, int z, int xMax, int zMax, int taskNum, int totalBlocks) {
+    private void setBlocks(int x, int y, int z, int xMax, int zMax, int chunksPer, int taskNum, int totalBlocks) {
         if (xMax > endX) xMax = endX;
         if (zMax > endZ) zMax = endZ;
         int savedZ = z;
-        for (; x < xMax; x++) {
-            for (; z < zMax; z++) {
-                if (changeable != null) changeable.change(world.getBlockAt(x, y, z));
-                if (material == null) continue;
-                plugin.getNms().setBlockFast(world, x, y, z, material, (byte) 0, false);
-                totalBlocks++;
-            }
-            z = savedZ;
-        }
+        int savedX = x;
 
+        int chunkAmount = chunksPer * 16;
+
+        System.out.println(x + " " + y + " " + z);
+        System.out.println(xMax + " " + zMax);
+        NMS nms = plugin.getNms();
+        for (; y <= endY; y++) {
+            for (; x <= xMax; x++) {
+                if (x < startX) continue;
+                for (; z <= zMax; z++) {
+                    if (z < startZ) continue;
+                    if (changeable != null) changeable.change(world.getBlockAt(x, y, z));
+                    if (material == null) continue;
+                    nms.setBlockFast(world, x, y, z, material, (byte) 0, false);
+                    totalBlocks++;
+                }
+                z = savedZ;
+            }
+            x = savedX;
+        }
+        x = savedX;
+        z = savedZ;
         BlockTaskResult result = new BlockTaskResult(x, y, z, taskNum, totalBlocks);
 
         if (xMax < endX) {
-            xMax += blocksPerSection;
+            xMax += chunkAmount;
+            x += chunkAmount;
         } else if (zMax < endZ) {
-            x = startX;
-            xMax = startX + blocksPerSection;
-            zMax += blocksPerSection;
-            z+=blocksPerSection;
-        } else if (y < endY) {
-            x = startX;
-            z = startZ;
-            xMax = startX + blocksPerSection;
-            zMax = startZ + blocksPerSection;
-            y++;
+            x = chunkStartX;
+            xMax = chunkStartX + chunkAmount;
+            zMax += chunkAmount;
+            z+= chunkAmount;
         } else {
             plugin.removeBlockTask();
             if (finalCompletable != null) finalCompletable.onComplete(result);
             return;
         }
         int finalX = x;
+        int finalY = startY;
         int finalZ = z;
-        int finalY = y;
         int finalXMax = xMax;
         int finalZMax = zMax;
         int finalTotalBlocks = totalBlocks;
         if (sectionCompletable != null) sectionCompletable.onComplete(result);
-        Bukkit.getScheduler().runTaskLater(plugin, () -> setBlocks(finalX, finalY, finalZ, finalXMax, finalZMax, taskNum +1, finalTotalBlocks), tickSpeed);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> setBlocks(finalX, startY, finalZ, finalXMax, finalZMax, chunksPer, taskNum +1, finalTotalBlocks), tickSpeed);
+    }
+
+    public void setBlocks() {
+        if (isRunning) return;
+        plugin.addBlockTask(this);
+        if (!plugin.isFirstInQueue(this)) return;
+        isRunning = true;
+        int x = startX >> 4 << 4;
+        int z = startZ >> 4 << 4;
+        this.chunkStartX = x;
+        this.chunkStartZ = z;
+        setBlocks(x, 0, z, x + 15, z + 15, chunksPer, 0, 0);
     }
 
     public static class BlockTaskResult {
@@ -206,4 +265,10 @@ public class BlockTask implements Cloneable {
 
         void change(Block block);
     }
-}
+
+    @FunctionalInterface
+    public interface Runnable {
+
+        void run();
+
+    }
