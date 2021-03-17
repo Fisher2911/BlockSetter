@@ -1,12 +1,9 @@
 # BlockSetter
 
-You can use this to edit blocks in your world, as of now it only works in 1.16.4.
-It will at most set one y layer at a time
-For example, if there was a 100 x 100 * 256 layer you wanted cleared,
-And you specified to clear 100,000 blocks at a time, it would only clear
-10,000 blocks at a time because 100 * 100 = 10,000
-
-
+You can use this to interact with blocks in any world.
+It works one chunk at a time, it has been tested with 
+setting chunks to air with worlds filled with dirt up to y = 200
+repeating every tick, and it stayed at 20 tps the whole time.
 
 You can create multiple BlockTasks,
 They will be queued so they will not
