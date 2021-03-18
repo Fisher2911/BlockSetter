@@ -1,4 +1,16 @@
- private final BlockSetter plugin;
+package me.herobrinegoat.blocksetter;
+
+import me.herobrinegoat.blocksetter.nms.NMS;
+import org.apache.commons.lang3.Validate;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+
+public class BlockTask implements Cloneable {
+
+    private final BlockSetter plugin;
     public final World world;
     private final int startX;
     private final int startY;
@@ -7,7 +19,6 @@
     private final int endY;
     private final int endZ;
     private Material material;
-    private int chunksPer;
     private final int tickSpeed;
     private Completable sectionCompletable;
     private Completable finalCompletable;
@@ -27,11 +38,10 @@
      * @param endY
      * @param endZ
      * @param material - Material to set blocks
-     * @param chunksPer - How many blocks are set every cycle
      * @param tickSpeed - How often blocks are set, in ticks
      */
 
-    public BlockTask(World world, int startX, int startY, int startZ, int endX, int endY, int endZ, Material material, int chunksPer, int tickSpeed) {
+    public BlockTask(World world, int startX, int startY, int startZ, int endX, int endY, int endZ, Material material, int tickSpeed) {
         this.plugin = BlockSetter.getPlugin(BlockSetter.class);
         this.world = world;
         this.startX = startX;
@@ -41,16 +51,15 @@
         this.endY = Math.min(endY, 255);
         this.endZ = endZ;
         this.tickSpeed = tickSpeed;
-        this.chunksPer = chunksPer;
         this.material = material;
     }
 
-    public BlockTask(World world, int startX, int startY, int startZ, int endX, int endY, int endZ, int chunksPer, int tickSpeed) {
-        this(world, startX, startY, startZ, endX, endY, endZ, null, chunksPer, tickSpeed);
+    public BlockTask(World world, int startX, int startY, int startZ, int endX, int endY, int endZ, int tickSpeed) {
+        this(world, startX, startY, startZ, endX, endY, endZ, null, tickSpeed);
     }
 
     public BlockTask(World world, int startX, int startY, int startZ, int endX, int endY, int endZ, Material material, int chunksPer, int tickSpeed, Completable sectionCompletable, Completable finalCompletable) {
-        this(world, startX, startY, startZ, endX, endY, endZ, material, chunksPer, tickSpeed);
+        this(world, startX, startY, startZ, endX, endY, endZ, material, tickSpeed);
         this.sectionCompletable = sectionCompletable;
         this.finalCompletable = finalCompletable;
     }
@@ -80,7 +89,6 @@
         this.endY = Math.min(end.getBlockY(), 255);
         this.endZ = end.getBlockZ();
         this.material = material;
-        this.chunksPer = chunksPer;
         this.tickSpeed = tickSpeed;
     }
 
@@ -128,10 +136,6 @@
         return material;
     }
 
-    public int getChunksPer() {
-        return chunksPer;
-    }
-
     public int getTickSpeed() {
         return tickSpeed;
     }
@@ -171,16 +175,15 @@
     int chunkStartX;
     int chunkStartZ;
 
-
-      private void setBlocks(int xMax, int zMax, int chunksPer, int taskNum, int totalBlocks) {
+    private void setBlocks(int xMax, int zMax, int taskNum, int totalBlocks) {
         y = startY;
         if (xMax > endX) xMax = endX;
         if (zMax > endZ) zMax = endZ;
         int savedZ = z;
         int savedX = x;
 
-        int chunkAmount = chunksPer * 16;
-        
+        int chunkAmount = 16;
+
         NMS nms = plugin.getNms();
         for (; y <= endY; y++) {
             for (; x <= xMax; x++) {
@@ -213,12 +216,12 @@
             if (finalCompletable != null) finalCompletable.onComplete(result);
             return;
         }
- 
+
         int finalXMax = xMax;
         int finalZMax = zMax;
         int finalTotalBlocks = totalBlocks;
         if (sectionCompletable != null) sectionCompletable.onComplete(result);
-        Bukkit.getScheduler().runTaskLater(plugin, () -> setBlocks(finalXMax, finalZMax, chunksPer, taskNum +1, finalTotalBlocks), tickSpeed);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> setBlocks(finalXMax, finalZMax, taskNum +1, finalTotalBlocks), tickSpeed);
     }
 
     public void setBlocks() {
@@ -230,7 +233,7 @@
         int z = startZ >> 4 << 4;
         this.chunkStartX = x;
         this.chunkStartZ = z;
-        setBlocks(x + 15, z + 15, chunksPer, 0, 0);
+        setBlocks(x + 15, z + 15, 0, 0);
     }
 
     public static class BlockTaskResult {
@@ -269,3 +272,4 @@
         void run();
 
     }
+}
