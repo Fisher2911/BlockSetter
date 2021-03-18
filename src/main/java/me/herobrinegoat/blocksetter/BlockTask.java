@@ -58,27 +58,27 @@ public class BlockTask implements Cloneable {
         this(world, startX, startY, startZ, endX, endY, endZ, null, tickSpeed);
     }
 
-    public BlockTask(World world, int startX, int startY, int startZ, int endX, int endY, int endZ, Material material, int chunksPer, int tickSpeed, Completable sectionCompletable, Completable finalCompletable) {
+    public BlockTask(World world, int startX, int startY, int startZ, int endX, int endY, int endZ, Material material, int tickSpeed, Completable sectionCompletable, Completable finalCompletable) {
         this(world, startX, startY, startZ, endX, endY, endZ, material, tickSpeed);
         this.sectionCompletable = sectionCompletable;
         this.finalCompletable = finalCompletable;
     }
 
-    public BlockTask(Location start, Location end, int chunksPer, int tickSpeed, Completable sectionCompletable, Completable finalCompletable) {
-        this(start, end, null, chunksPer, tickSpeed, sectionCompletable, finalCompletable);
+    public BlockTask(Location start, Location end, int tickSpeed, Completable sectionCompletable, Completable finalCompletable) {
+        this(start, end, null, tickSpeed, sectionCompletable, finalCompletable);
     }
 
-    public BlockTask(Location start, Location end, Material material, int chunksPer, int tickSpeed, Completable sectionCompletable, Completable finalCompletable) {
-        this(start, end, material, chunksPer, tickSpeed);
+    public BlockTask(Location start, Location end, Material material, int tickSpeed, Completable sectionCompletable, Completable finalCompletable) {
+        this(start, end, material, tickSpeed);
         this.sectionCompletable = sectionCompletable;
         this.finalCompletable = finalCompletable;
     }
 
-    public BlockTask(Location start, Location end, int chunksPer, int tickSpeed) {
-        this(start, end, null, chunksPer, tickSpeed);
+    public BlockTask(Location start, Location end, int tickSpeed) {
+        this(start, end, null, tickSpeed);
     }
 
-    public BlockTask(Location start, Location end, Material material, int chunksPer, int tickSpeed) {
+    public BlockTask(Location start, Location end, Material material, int tickSpeed) {
         Validate.isTrue(start.getWorld() != null && start.getWorld().equals(end.getWorld()), "The two world locations must be non-null and the same!");
         this.plugin = BlockSetter.getPlugin(BlockSetter.class);
         this.world = start.getWorld();
